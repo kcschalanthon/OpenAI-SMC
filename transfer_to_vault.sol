@@ -34,6 +34,17 @@ contract Vault {
 
     Token public token;
 
+    // Struct for storing information about a recipient
+    struct Recipient {
+        uint256 priority;
+        address recipientAddress;
+        uint256 ratio;
+        address erc20Address;
+    }
+
+    // Mapping of recipient addresses to recipient information
+    mapping(address => Recipient) public recipients;
+
     constructor(IERC20 _token) public {
         token = new Token(_token);
     }
@@ -50,5 +61,21 @@ contract Vault {
     function transferFrom(address _from, address _to, uint256 _value) public {
         // Add any additional checks or logic here
         token.transferFrom(_from, _to, _value);
+    }
+
+    // Function for adding a batch of recipients with the specified priority, recipient address, ratio, and ERC-20 token address
+    function addBatchRecipients(uint256[] memory _priorities, address[] memory _recipientAddresses, uint256[] memory _ratios, address[] memory _erc20Addresses) public {
+        require(_priorities.length == _recipientAddresses.length, "Number of priorities and recipient addresses must match.");
+        require(_priorities.length == _ratios.length, "Number of priorities and ratios must match.");
+        require(_priorities.length == _erc20Addresses.length, "Number of priorities and ERC-20 addresses must match.");
+
+        for (uint256 i = 0; i < _priorities.length; i++) {
+            Recipient memory recipient;
+            recipient.priority = _priorities[i];
+            recipient.recipientAddress = _recipientAddresses[i];
+            recipient.ratio = _ratios[i];
+            recipient.erc20Address = _erc20Addresses[i];
+            recipients[_recipientAddresses[i]] = recipient;
+        }
     }
 }
